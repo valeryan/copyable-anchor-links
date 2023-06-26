@@ -1,0 +1,25 @@
+
+.cal-anchor-link {
+  display: inline-block;
+  margin-left: 0.5em;
+  text-decoration: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.cal-header-hover .cal-anchor-link {
+  opacity: 1;
+  visibility: visible;
+}
+
+.cal-anchor-link:before {
+  content: "\f103";
+  font-family: dashicons;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.cal-anchor-link.cal-link-copied:before {
+  content: "\f147";
+}
