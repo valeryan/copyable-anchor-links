@@ -1,24 +1,65 @@
 /**
- * Simple implementation of the djb2 hash function
- * @param {string} str 
- * @returns 
+ * Generate a sanitized ID from the header text
+ * @param {string} text
+ * @returns {string}
  */
-function djb2Hash(str) {
-  let hash = 5381;
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash * 33) ^ str.charCodeAt(i);
+function generateIdFromText(text) {
+  const sanitizedText = sanitizeTitleWithDashes(text);
+  let id = sanitizedText.substring(0, 100);
+  if (id.endsWith('-')) {
+    id = id.slice(0, -1);
   }
-  return hash >>> 0; // Ensure the hash is a positive 32-bit integer
+  return id;
 }
 
 /**
- * Hash the header text to generate a permalink hash
- * @param {string} str 
- * @returns string
+ * Sanitize text using WordPress' sanitize_title_with_dashes() function
+ * @param {string} text
+ * @returns {string}
  */
-function generateShortHash(str) {
-  const hash = djb2Hash(str).toString(16);
-  return hash;
+function sanitizeTitleWithDashes(text) {
+  // Assuming you're working within a WordPress environment
+  if (typeof window.wp !== 'undefined' && typeof window.wp.sanitize !== 'undefined') {
+    return window.wp.sanitize.titleWithDashes(text);
+  }
+
+  // Fallback to a basic implementation if WordPress function is not available
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
+
+/**
+ * Display a toast message
+ * @param {string} message
+ * @param {string} type
+ */
+function displayToast(message, type) {
+  // Create a toast container
+  var toastContainer = jQuery('<div class="cal-toast-container"></div>');
+
+  // Create the toast element
+  var toast = jQuery('<div class="cal-toast ' + type + '">' + message + '</div>');
+
+  // Append the toast to the container
+  toastContainer.append(toast);
+
+  // Append the container to the body
+  jQuery('body').append(toastContainer);
+
+  toast.css({ visibility: 'visible' })
+  // Show the toast with animation
+  toast.animate({ opacity: 1 }, 300, function () {
+    // Delay for a few seconds and then fade out
+    setTimeout(function () {
+      toast.animate({ opacity: 0 }, 300, function () {
+        // Remove the toast from the DOM
+        toast.css({ opacity: 0, visibility: 'hidden' })
+        toastContainer.remove();
+      });
+    }, 3000); // Adjust the delay as needed
+  });
 }
 
 /**
@@ -29,11 +70,7 @@ function addAnchorsToHeaders() {
     .find("h1, h2, h3, h4, h5, h6")
     .each(function () {
       var headerText = jQuery(this).text();
-      var headerHash =
-        "cal-h" +
-        this.tagName.toLowerCase().substr(1) +
-        "-" +
-        generateShortHash(headerText);
+      var headerHash = generateIdFromText(headerText);
       var $header = jQuery(this);
       var $anchor = jQuery("<a>", {
         class: "cal-anchor-link",
@@ -42,15 +79,7 @@ function addAnchorsToHeaders() {
       });
 
       $header.attr("id", headerHash);
-      $header.append($anchor);
-
-      $header.on("mouseenter", function () {
-        $header.addClass("cal-header-hover");
-      });
-
-      $header.on("mouseleave", function () {
-        $header.removeClass("cal-header-hover");
-      });
+      $header.prepend($anchor);
 
       $anchor.click(function (e) {
         e.preventDefault();
@@ -64,6 +93,9 @@ function addAnchorsToHeaders() {
             setTimeout(function () {
               $anchor.removeClass("cal-link-copied");
             }, 2000);
+
+            // Display toast message when link is copied
+            displayToast("Link copied to clipboard!", "success");
           })
           .catch(function (error) {
             console.error("Failed to copy link:", error);
@@ -81,13 +113,16 @@ function addAnchorsToHeaders() {
 
 /**
  * Adjust the offset to give some space from the top bar
- * @param {number} offset 
+ * @param {number} offset
  */
 function scrollToOffset(offset) {
   var offsetAdjustment = 110;
-  jQuery('html, body').animate({
-    scrollTop: offset - offsetAdjustment
-  }, 500);
+  jQuery('html, body').animate(
+    {
+      scrollTop: offset - offsetAdjustment,
+    },
+    500
+  );
 }
 
 /**

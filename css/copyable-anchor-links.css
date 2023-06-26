@@ -1,25 +1,53 @@
-
 .cal-anchor-link {
-  display: inline-block;
-  margin-left: 0.5em;
   text-decoration: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
+  margin-left: -18px;
+  padding-right: 4px;
 }
 
-.cal-header-hover .cal-anchor-link {
+h1:hover .cal-anchor-link,
+h2:hover .cal-anchor-link,
+h3:hover .cal-anchor-link,
+h4:hover .cal-anchor-link,
+h5:hover .cal-anchor-link,
+h6:hover .cal-anchor-link {
   opacity: 1;
   visibility: visible;
 }
 
-.cal-anchor-link:before {
+.cal-anchor-link:after {
   content: "\f103";
   font-family: dashicons;
   font-size: 14px;
   line-height: 1;
 }
 
-.cal-anchor-link.cal-link-copied:before {
+.cal-anchor-link.cal-link-copied:after {
   content: "\f147";
+}
+
+.cal-toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 99999;
+}
+
+.cal-toast {
+  background-color: #333;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 4px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.cal-toast.success {
+  background-color: #7f977f;
+}
+
+.cal-toast-container .cal-toast {
+  margin-bottom: 10px;
 }
